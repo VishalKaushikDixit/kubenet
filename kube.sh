@@ -20,11 +20,43 @@ kubenet() {
             break
         done
     elif [ "$o1" == "des" ]; then
+        echo "1. po"
+        echo "2. deploy"
+        echo "3. hpa"
+        echo "4. cm"
+
+        read -p "select option" choice
+        case $choice in
+            1)
+                kubenet "po"
+                ;;
+            2)
+                kubenet "deploy"
+                ;;
+            3)
+                kubenet "hpa"
+                ;;
+            4)
+                kubenet "cm"
+                ;;
+            5)
+                kubectl "ds"
+                ;;
+            6)
+                kubectl "secrets"
+                ;;
+            7)
+                kubectl "certificates"
+                ;;
+            *)
+                echo "Invalid option. Please try again."
+                ;;
+            esac
         select ns in "${namespace[@]}"; do
-            pod="$(kubectl get po -n $ns | awk 'NR>1 {print $1}')"
+            pod="$(kubectl get $o1 -n $ns | awk 'NR>1 {print $1}')"
             IFS=$'\n' read -rd '' -a po <<<"$pod"
             if [ ${#po[@]} -gt 0 ]; then
-                kubectl get po -n $ns
+                kubectl get $o1 -n $ns
                 select p in "${po[@]}"; do
                     kubectl -n $ns describe po $p
                 done
@@ -67,7 +99,7 @@ kubenet() {
                 ;;
         esac    
         select ns in "${namespace[@]}"; do
-            pod="$(kubectl get po -n $ns | awk 'NR>1 {print $1}')"
+            pod="$(kubectl get $o1 -n $ns | awk 'NR>1 {print $1}')"
             IFS=$'\n' read -rd '' -a po <<<"$pod"
             if [ ${#po[@]} -gt 0 ]; then
                 kubectl get $o1 -n $ns
@@ -116,6 +148,49 @@ kubenet() {
             fi
             break
         done
+        elif [ "$o1" == "edit" ]; then
+        echo "1. po"
+        echo "2. deploy"
+        echo "3. hpa"
+        echo "4. cm"
+
+        read -p "select option" choice
+        case $choice in
+            1)
+                kubenet "po"
+                ;;
+            2)
+                kubenet "deploy"
+                ;;
+            3)
+                kubenet "hpa"
+                ;;
+            4)
+                kubenet "cm"
+                ;;
+            5)
+                kubectl "ds"
+                ;;
+            6)
+                kubectl "secrets"
+                ;;
+            7)
+                kubectl "certificates"
+                ;;
+            *)
+                echo "Invalid option. Please try again."
+                ;;
+        esac    
+        select ns in "${namespace[@]}"; do
+            pod="$(kubectl get po -n $ns | awk 'NR>1 {print $1}')"
+            IFS=$'\n' read -rd '' -a po <<<"$pod"
+            if [ ${#po[@]} -gt 0 ]; then
+                kubectl edit $o1 -n $ns
+            else
+                echo "No resources found in $ns namespace."
+            fi
+            break
+        done
     else
         echo "Nothing"
     fi
@@ -124,9 +199,10 @@ kubenet() {
 
 echo "1. get"
 echo "2. logs"
-echo "3. describe po"
+echo "3. describe"
 echo "4. nodes"
-echo "5. Exit"
+echo "5. edit"
+echo "6. Exit"
 
 read -p "select option" choice
 
@@ -144,6 +220,9 @@ case $choice in
         kubenet "nodes"
         ;;
     5)
+        kubenet "edit"
+        ;;
+    6)
         exit 0
         ;;
     *)
