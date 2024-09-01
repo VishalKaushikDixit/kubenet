@@ -341,6 +341,59 @@ deployment() {
             fi
             break
         done
+    elif [ "$o1" == "scale" ]; then
+        echo "1. deployment"
+        echo "2. statefulset"
+        echo "3. daemonset"
+        echo "4. replicaset"
+        echo "5. job"
+        echo "6 cronjob"
+
+        read -p "select option" choice
+        case $choice in
+            1)
+                deployment "deployment"
+                ;;
+            2)
+                deployment "statefulset"
+                ;;
+            3)
+                deployment "daemonset"
+                ;;
+            4)
+                deployment "replicaset"
+                ;;
+            5)
+                deployment "ds"
+                ;;
+            6)
+                deployment "secrets"
+                ;;
+            7)
+                deployment "job"
+                ;;
+            8)
+                deployment "rc"
+                ;;
+            *)
+                echo "Invalid option. Please try again."
+                ;;
+        esac
+
+        select ns in "${namespace[@]}"; do
+            deploy="$(kubectl get $o1 -n $ns | awk 'NR>1 {print $1}')"
+            IFS=$'\n' read -rd '' -a dep <<<"$deploy"
+            echo "Please enter your numbers of replica:"
+            read replica
+            if [ ${#dep[@]} -gt 0 ]; then
+                select d in "${dep[@]}"; do
+                    kubectl -n $ns scale $o1 $d --replicas=$replica
+                done
+            else
+                echo "No resources found in $ns namespace."
+            fi
+            break
+        done
     else
         echo "Nothing"
     fi
@@ -354,7 +407,8 @@ echo "5. edit"
 echo "6. Delete"
 echo "7. Rollout Retart"
 echo "8. Rollout Status"
-echo "9 exit"
+echo "9. Scale"
+echo "10 exit"
 
 read -p "select option" choice
 
@@ -384,6 +438,9 @@ case $choice in
         deployment "rollout restart"
         ;;
     9)
+        deployment "scale"
+        ;;
+    10)
         exit 0
         ;;
     *)
