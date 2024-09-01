@@ -34,11 +34,34 @@ kubenet() {
             break
         done
     elif [ "$o1" == "get" ]; then
+        echo "1. po"
+        echo "2. deploy"
+        echo "3. hpa"
+        echo "4. cm"
+
+        read -p "select option" choice
+        case $choice in
+            1)
+                kubenet "po"
+                ;;
+            2)
+                kubenet "deploy"
+                ;;
+            3)
+                kubenet "hpa"
+                ;;
+            4)
+                kubenet "cm"
+                ;;
+            *)
+                echo "Invalid option. Please try again."
+                ;;
+        esac    
         select ns in "${namespace[@]}"; do
             pod="$(kubectl get po -n $ns | awk 'NR>1 {print $1}')"
             IFS=$'\n' read -rd '' -a po <<<"$pod"
             if [ ${#po[@]} -gt 0 ]; then
-                kubectl get po -n $ns
+                kubectl get $o1 -n $ns
             else
                 echo "No resources found in $ns namespace."
             fi
