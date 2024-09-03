@@ -6,7 +6,7 @@ kubenet() {
     IFS=$'\n' read -rd '' -a namespace <<<"$kube"
 
     if [ "$o1" == "logs" ]; then
-        select ns in "${namespace[@]}"; do``
+        select ns in "${namespace[@]}"; do
             pod="$(kubectl get po -n $ns | awk 'NR>1 {print $1}')"
             IFS=$'\n' read -rd '' -a po <<<"$pod"
             if [ ${#po[@]} -gt 0 ]; then
