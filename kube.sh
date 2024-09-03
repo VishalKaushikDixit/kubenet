@@ -6,13 +6,18 @@ kubenet() {
     IFS=$'\n' read -rd '' -a namespace <<<"$kube"
 
     if [ "$o1" == "logs" ]; then
-        select ns in "${namespace[@]}"; do
+        select ns in "${namespace[@]}"; do``
             pod="$(kubectl get po -n $ns | awk 'NR>1 {print $1}')"
             IFS=$'\n' read -rd '' -a po <<<"$pod"
             if [ ${#po[@]} -gt 0 ]; then
-                kubectl get po -n $ns
                 select p in "${po[@]}"; do
-                    kubectl -n $ns logs -f $p
+                    echo "Search any resource :"
+                    read search
+                    if [ -n "$search" ]; then
+                        kubectl -n $ns logs -f $p | grep -i $search
+                    else
+                        kubectl -n $ns logs -f $p
+                    fi
                 done
             else
                 echo "No resources found in $ns namespace."
@@ -99,10 +104,16 @@ kubenet() {
                 ;;
         esac    
         select ns in "${namespace[@]}"; do
+            echo "Search any resource :"
+            read search
             pod="$(kubectl get $o1 -n $ns | awk 'NR>1 {print $1}')"
             IFS=$'\n' read -rd '' -a po <<<"$pod"
             if [ ${#po[@]} -gt 0 ]; then
-                kubectl get $o1 -n $ns
+                if [ -n "$search" ]; then
+                    kubectl get $o1 -n $ns | grep -i $search
+                else
+                    kubectl get $o1 -n $ns
+                fi
             else
                 echo "No resources found in $ns namespace."
             fi
@@ -399,11 +410,11 @@ deployment() {
     fi
 }
 
-echo "1. get"
-echo "2. logs"
-echo "3. describe"
-echo "4. nodes"
-echo "5. edit"
+echo "1. Get"
+echo "2. Logs"
+echo "3. Describe"
+echo "4. Nodes"
+echo "5. Edit"
 echo "6. Delete"
 echo "7. Rollout Retart"
 echo "8. Rollout Status"
